@@ -1,9 +1,16 @@
 # rec-challenge
 
+## Setup
+
 To install dependencies:
 
 ```bash
 bun install
+```
+
+To create a sqlite db file:
+```shell
+cat seed.sql | sqlite3 db.sqlite
 ```
 
 To run:
