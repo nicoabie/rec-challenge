@@ -1,4 +1,4 @@
-export const check = (req: Request): Response => {
+export const search = (req: Request): Response => {
 	const data = { restaurantIds: [2, 4], availabilityToken: "" };
 	return new Response(JSON.stringify(data));
 };

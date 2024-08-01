@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { cancel, check, reserve } from "./api";
+import { cancel, reserve, search } from "./api";
 
 // in all the endpoints we have a loggedInUserId: 1.
 // ideally that should come in an authorization token or cookie but as auth is OOS, I put it in the body as any other prop.
 
-describe("check", () => {
+describe("search", () => {
 	test("returns list of available restaurants for given constraints", async () => {
 		const data = {
 			loggedInUserId: 1,
@@ -17,11 +17,11 @@ describe("check", () => {
 			// in UTC
 			datetime: new Date(),
 		};
-		const req = new Request("http://localhost/check", {
+		const req = new Request("http://localhost/search", {
 			method: "POST",
 			body: JSON.stringify(data),
 		});
-		const res = await check(req).json();
+		const res = await search(req).json();
 		expect(res).toMatchObject({ restaurantIds: [2, 4], availabilityToken: "" });
 	});
 });
