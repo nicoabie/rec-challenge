@@ -1,11 +1,16 @@
 import type { Database } from "bun:sqlite";
-import { datetimeToISO8601, restrictionsToBits } from "./utils";
+
+import { datetimeToISO8601, idsToBits } from "./utils";
 
 export const findTables = (
 	db: Database,
-	search: { capacity: number; datetime: Date; restrictions: number[] },
+	search: {
+		capacity: number;
+		datetime: Date;
+		restrictionIds: number[];
+	},
 ): { restaurantId: number; tableIds: number[] }[] => {
-	const { capacity, datetime, restrictions } = search;
+	const { capacity, datetime, restrictionIds } = search;
 
 	const query = db.query(`
         SELECT
@@ -29,7 +34,7 @@ export const findTables = (
 	const items = query.all({
 		capacity,
 		datetime: datetimeToISO8601(datetime),
-		restrictions: restrictionsToBits(restrictions),
+		restrictions: idsToBits(restrictionIds),
 	}) as { id: number; restaurant_id: number }[];
 
 	return Object.entries(

@@ -8,8 +8,8 @@ describe("findTables", () => {
 	test("retrieves data", () => {
 		const result = findTables(db, {
 			capacity: 6,
-			datetime: new Date(2007, 0, 1, 10, 0, 0),
-			restrictions: [1],
+			datetime: new Date(2024, 7, 1, 22, 0, 0),
+			restrictionIds: [1],
 		});
 		expect(result).toMatchObject([
 			{

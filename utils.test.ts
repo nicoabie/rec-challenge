@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { datetimeToISO8601, restrictionsToBits } from "./utils";
+import { datetimeToISO8601, idsToBits } from "./utils";
 
 describe("datetimeToISO8601", () => {
 	// ideally we should create more tests, we could use something like https://github.com/dubzzz/fast-check to generate many test cases
@@ -11,17 +11,17 @@ describe("datetimeToISO8601", () => {
 	});
 });
 
-describe("restrictionsToBits", () => {
+describe("idsToBits", () => {
 	// ideally we should create more tests, we could use something like https://github.com/dubzzz/fast-check to generate many test cases
-	test("serializes correctly zero restrictions", () => {
-		expect(restrictionsToBits([])).toBe(0);
+	test("serializes correctly zero ids", () => {
+		expect(idsToBits([])).toBe(0);
 	});
 
-	test("serializes correctly 1 restriction", () => {
-		expect(restrictionsToBits([1])).toBe(1);
+	test("serializes correctly 1 id", () => {
+		expect(idsToBits([1])).toBe(1);
 	});
 
-	test("serializes correctly 2 restriction", () => {
-		expect(restrictionsToBits([1, 3])).toBe(5);
+	test("serializes correctly 2 ids", () => {
+		expect(idsToBits([1, 3])).toBe(5);
 	});
 });
