@@ -1,4 +1,5 @@
 import type { Database } from "bun:sqlite";
+import { addHours } from "date-fns/addHours";
 
 import { datetimeToISO8601, idsToBits } from "./utils";
 
@@ -20,7 +21,7 @@ export const findTables = (
             tables t
             JOIN restaurants r ON t.restaurant_id = r.id
             LEFT JOIN reservations ON t.id = reservations.table_id
-                AND reservations.datetime != $datetime
+                AND reservations.datetime between $minDatetime and $maxDatetime
         WHERE
             reservations.id IS NULL
             AND t.capacity >= $capacity
@@ -33,7 +34,8 @@ export const findTables = (
 
 	const items = query.all({
 		capacity,
-		datetime: datetimeToISO8601(datetime),
+		minDatetime: datetimeToISO8601(addHours(datetime, -2)),
+		maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
 		restrictions: idsToBits(restrictionIds),
 	}) as { id: number; restaurant_id: number }[];
 
