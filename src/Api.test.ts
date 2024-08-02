@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { cancel, reserve, search } from "./api";
+import { Api } from "./Api";
+
+const api = new Api();
 
 // in all the endpoints we have a loggedInUserId: 1.
 // ideally that should come in an authorization token or cookie but as auth is OOS, I put it in the body as any other prop.
@@ -21,7 +23,7 @@ describe("search", () => {
 			method: "POST",
 			body: JSON.stringify(data),
 		});
-		const res = await search(req).json();
+		const res = await api.search(req).json();
 		expect(res).toMatchObject({ restaurantIds: [2, 4], availabilityToken: "" });
 	});
 });
@@ -42,7 +44,7 @@ describe("reserve", () => {
 			method: "POST",
 			body: JSON.stringify(data),
 		});
-		const res = await reserve(req).json();
+		const res = await api.reserve(req).json();
 		expect(res).toBeEmptyObject();
 	});
 });
@@ -57,7 +59,7 @@ describe("cancel", () => {
 			method: "POST",
 			body: JSON.stringify(data),
 		});
-		const res = await cancel(req).json();
+		const res = await api.cancel(req).json();
 		expect(res).toBeEmptyObject();
 	});
 });
