@@ -21,7 +21,7 @@ CREATE TABLE tables (
   capacity INTEGER
 );
 
--- reservations and diners_reservations will get huge over time, we can use datetime column in both tables to archive past records
+-- reservations and diners_reservations will get huge over time, we can use datetime column in both tables to archive past records. daily or weekly process
 
 DROP TABLE IF EXISTS reservations;
 CREATE TABLE reservations (
@@ -118,7 +118,3 @@ insert into tables (restaurant_id, capacity) values (4, 6);
 
 insert into tables (restaurant_id, capacity) values (5, 2);
 insert into tables (restaurant_id, capacity) values (5, 2);
-
-
--- there could be a restrictions table with their names and abbreviations to display in the UI
--- and send extra restrictions for incognito users but this is OOS
