@@ -1,7 +1,8 @@
+import { formatDate } from "date-fns";
+
 // this is what sqlite uses https://www.sqlite.org/lang_datefunc.html
 export const datetimeToISO8601 = (datetime: Date) => {
-	const [datePart, timePart] = datetime.toISOString().split("T");
-	return `${datePart} ${timePart.substring(0, 8)}`;
+	return formatDate(datetime, 'yyyy-MM-dd HH:mm:ss')
 };
 
 export const idsToBits = (ids: number[]): number => {

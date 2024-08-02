@@ -12,5 +12,8 @@
 	},
 	"peerDependencies": {
 		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"date-fns": "^3.6.0"
 	}
 }
