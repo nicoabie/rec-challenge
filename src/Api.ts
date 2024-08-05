@@ -12,8 +12,27 @@ export class Api {
 		return new Response(JSON.stringify(data));
 	};
 
-	reserve = (req: Request): Response => {
-		return new Response("{}");
+	reserve = async (req: Request): Promise<Response> => {
+		const dinerId = +(req.headers.get("loggedInDinerId") ?? 0) as number;
+		const { restaurantId, availabilityToken } = await req.json();
+		const { diners, dinerIds, datetime, tables } = JSON.parse(
+			atob(availabilityToken),
+		);
+		// TODO validate inputs
+		try {
+			const reservation = this.reservationService.reserve(dinerId, {
+				restaurantId,
+				diners,
+				dinerIds,
+				datetime,
+				tables,
+			});
+			return new Response(JSON.stringify(reservation), { status: 201 });
+		} catch (error) {
+			return new Response(JSON.stringify({ error: (error as Error).message }), {
+				status: 409,
+			});
+		}
 	};
 
 	cancel = async (req: Request): Promise<Response> => {

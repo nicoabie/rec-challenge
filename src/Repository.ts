@@ -13,9 +13,13 @@ export class Repository {
 	findTables = (search: {
 		capacity: number;
 		datetime: Date;
-		restrictionIds: number[];
-	}): { restaurantId: number; tableIds: number[] }[] => {
-		const { capacity, datetime, restrictionIds } = search;
+		restrictionIds?: number[];
+		restaurantId?: number;
+	}): Record<string, number[]> => {
+		// this method can be used either specifying restrictionIds when doing the search
+		// OR specifying a restaurantId if when optimistically trying to create a reservation it couldn't
+		// and we need to search for more tables
+		const { capacity, datetime, restrictionIds, restaurantId } = search;
 
 		const query = this.db.query(`
 			SELECT
@@ -25,30 +29,28 @@ export class Repository {
 				tables t
 				JOIN restaurants r ON t.restaurant_id = r.id
 				LEFT JOIN reservations ON t.id = reservations.table_id
-					AND reservations.datetime between $minDatetime and $maxDatetime
+					AND reservations.datetime BETWEEN $minDatetime AND $maxDatetime
 			WHERE
 				reservations.id IS NULL
 				AND t.capacity >= $capacity
-				AND r.restrictions & $restrictions = $restrictions
-			ORDER BY
-				t.restaurant_id,
-				-- this is on purpose to offer smaller tables first
-				t.capacity ASC;
+				${restrictionIds ? "AND r.restrictions & $restrictions = $restrictions" : ""}
+				${restaurantId ? "AND r.id = $restaurantId" : ""}
+			ORDER BY t.restaurant_id
 		`);
 
 		const items = query.all({
 			capacity,
 			minDatetime: datetimeToISO8601(addHours(datetime, -2)),
 			maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
-			restrictions: idsToBits(restrictionIds),
+			...(restrictionIds && { restrictions: idsToBits(restrictionIds) }),
+			...(restaurantId && { restaurantId }),
 		}) as { id: number; restaurant_id: number }[];
 
-		return Object.entries(
-			Object.groupBy(items, (item) => item.restaurant_id),
-		).map(([keys, values]) => ({
-			restaurantId: +keys,
-			tableIds: values?.map((v) => v.id) ?? [],
-		}));
+		return Object.fromEntries(
+			Object.entries(Object.groupBy(items, (item) => item.restaurant_id)).map(
+				([keys, values]) => [keys, values?.map((v) => v.id) ?? []],
+			),
+		);
 	};
 
 	deleteReservation = (reservationId: number, dinerId: number): boolean => {
@@ -73,5 +75,69 @@ export class Repository {
 		});
 
 		return !!result.changes;
+	};
+
+	createReservation = (info: {
+		tableIds: number[];
+		capacity: number;
+		datetime: Date;
+	}): number | null => {
+		const { tableIds, capacity, datetime } = info;
+
+		const query = this.db.query(`
+			INSERT INTO reservations (restaurant_id, table_id, capacity, datetime) 
+			SELECT t.restaurant_id, t.id, $capacity, $datetime FROM tables t 
+				LEFT JOIN reservations ON t.id = reservations.table_id
+				AND reservations.datetime BETWEEN $minDatetime AND $maxDatetime
+			WHERE 
+				reservations.id IS NULL
+				-- seems bun does not have a way to do this yet or documentation does not mention it
+				-- this is dangerous and could be sql injected
+				AND t.id IN (${tableIds})
+			-- this is on purpose to offer smaller tables first
+			ORDER BY t.capacity ASC
+			LIMIT 1; 
+		`);
+
+		const result = query.run({
+			datetime: datetimeToISO8601(datetime),
+			capacity,
+			minDatetime: datetimeToISO8601(addHours(datetime, -2)),
+			maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
+		});
+
+		if (result.changes) {
+			return result.lastInsertRowid as number;
+		}
+		return null;
+	};
+
+	createResevationDiners = (info: {
+		reservationId: number;
+		dinerIds: number[];
+		datetime: Date;
+	}) => {
+		const { reservationId, dinerIds, datetime } = info;
+
+		const query = this.db.query(`
+			INSERT INTO diners_reservations (diner_id, reservation_id, datetime) 
+			SELECT d.id, $reservationId, $datetime FROM diners d 
+				LEFT JOIN diners_reservations ON d.id = diners_reservations.diner_id
+				AND diners_reservations.datetime BETWEEN $minDatetime AND $maxDatetime
+			WHERE 
+				diners_reservations.id IS NULL
+				-- seems bun does not have a way to do this yet or documentation does not mention it
+				-- this is dangerous and could be sql injected
+				AND d.id IN (${dinerIds})
+		`);
+
+		const result = query.run({
+			reservationId,
+			datetime: datetimeToISO8601(datetime),
+			minDatetime: datetimeToISO8601(addHours(datetime, -2)),
+			maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
+		});
+
+		return result.changes;
 	};
 }

@@ -13,8 +13,8 @@ describe("search", () => {
 		const data = {
 			// we have the amount of total diners (users of the app "friends" + people without a platform user)
 			diners: 8,
-			// userIds of platform users including loggedInUser
-			userIds: [1, 2, 3, 4],
+			// dinerIds of platform users including loggedInDinerId
+			dinerIds: [1, 2, 3, 4],
 			// restrictions of people without a platform user
 			extraRestrictions: [],
 			// in UTC
@@ -33,14 +33,21 @@ describe("search", () => {
 });
 
 describe("reserve", () => {
-	test("returns empty object", async () => {
+	test("returns 201 if reservation was created", async () => {
 		const data = {
 			// checking available tables can be an expensive operation so when the user first checks we encode all the restaurants with the
 			// dietary restrictions, available tables for the amount of diners and datetime into a token.
 
 			// when doing the actual resevation we will optimistically use any table for the given restaurant id to do the reservation.
 			// in case it fails we will search again if any new table was made available.
-			availabilityToken: "",
+			availabilityToken: btoa(
+				JSON.stringify({
+					diners: 2,
+					dinerIds: [1, 2],
+					datetime: new Date(2024, 7, 5, 20, 0, 0),
+					tables: { 1: [1, 2], 2: [3, 4] },
+				}),
+			),
 			restaurantId: 1,
 		};
 		const req = new Request("http://localhost/reserve", {
@@ -50,8 +57,43 @@ describe("reserve", () => {
 				loggedInDinerId: "1",
 			},
 		});
-		const res = await api.reserve(req).json();
-		expect(res).toBeEmptyObject();
+
+		//stub
+		reservationService.reserve = () => ({ id: 3 });
+
+		const res = await api.reserve(req);
+		expect(res.status).toBe(201);
+	});
+
+	test("returns 409 (conflict) if reservation was not created", async () => {
+		const data = {
+			availabilityToken: btoa(
+				JSON.stringify({
+					diners: 2,
+					dinerIds: [1, 2],
+					datetime: new Date(2024, 7, 5, 20, 0, 0),
+					tables: { 1: [1, 2], 2: [3, 4] },
+				}),
+			),
+			restaurantId: 1,
+		};
+		const req = new Request("http://localhost/reserve", {
+			method: "POST",
+			body: JSON.stringify(data),
+			headers: {
+				loggedInDinerId: "1",
+			},
+		});
+
+		//stub
+		reservationService.reserve = () => {
+			throw new Error("NO_TABLE_AVAILABLE");
+		};
+
+		const res = await api.reserve(req);
+		const body = await res.json();
+		expect(res.status).toBe(409);
+		expect(body).toMatchObject({ error: "NO_TABLE_AVAILABLE" });
 	});
 });
 
