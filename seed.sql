@@ -38,7 +38,7 @@ DROP TABLE IF EXISTS diners_reservations;
 CREATE TABLE diners_reservations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   diner_id INTEGER NOT NULL,
-  table_id INTEGER NOT NULL,
+  reservation_id INTEGER NOT NULL,
   -- this is the same datetime as in reservations
   -- we include it here to fastly check if any user has already a reservation at a given datetime
   -- and for archiving past records too

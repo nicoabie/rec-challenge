@@ -1,6 +1,15 @@
-import { Api } from "./src/Api";
+import { Database } from "bun:sqlite";
 
-const api = new Api();
+import { Api } from "./src/Api";
+import { Repository } from "./src/Repository";
+import { ReservationService } from "./src/ReservationService";
+
+// there are fancier ways to do this using DI or factories.
+// this is very easy to understand and we don't want overly complex solutions
+const db = new Database("db.sqlite", { strict: true });
+const repository = new Repository(db);
+const reservationService = new ReservationService(repository);
+const api = new Api(reservationService);
 
 const server = Bun.serve({
 	port: 3000,
@@ -10,10 +19,12 @@ const server = Bun.serve({
 		// but we need to send a body with amount of diners, ids of friends and extra dietary restrictions for unregistered users
 		// and it would be messy to encode that in the query string
 		// funny fact: http standard support bodies in GET but we don't want to get too crazy
-		if (url.pathname === "/search" && req.method === "POST") return api.search(req);
+		if (url.pathname === "/search" && req.method === "POST")
+			return api.search(req);
 		if (url.pathname === "/reserve" && req.method === "POST")
 			return api.reserve(req);
-		if (url.pathname === "/cancel" && req.method === "POST") return api.cancel(req);
+		if (url.pathname === "/cancel" && req.method === "DELETE")
+			return api.cancel(req);
 		return new Response("404!");
 	},
 });

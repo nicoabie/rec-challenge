@@ -50,4 +50,28 @@ export class Repository {
 			tableIds: values?.map((v) => v.id) ?? [],
 		}));
 	};
+
+	deleteReservation = (reservationId: number, dinerId: number): boolean => {
+		// we could implement soft deletes with a deletedAt column but I believe for the context of the problem
+		// it makes more sense to hard delete. maintaining cancelled reservations adds no value and makes searching and reservation harder
+		const query = this.db.query(`
+			DELETE FROM reservations 
+			WHERE id IN (
+				SELECT dr.reservation_id FROM diners_reservations dr 
+				WHERE
+					dr.reservation_id = $reservationId
+					-- all attendees in the platform can delete the reservation
+					AND dr.diner_id = $dinerId
+					-- we won't allow cancelling passed reservations
+					AND dr.datetime > datetime('now')
+				)
+		`);
+
+		const result = query.run({
+			reservationId,
+			dinerId,
+		});
+
+		return !!result.changes;
+	};
 }
