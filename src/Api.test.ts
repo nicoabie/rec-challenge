@@ -123,12 +123,8 @@ describe("reserve", () => {
 
 describe("cancel", () => {
 	test("returns 204 if reservation was cancelled", async () => {
-		const data = {
-			reservationId: 2,
-		};
-		const req = new Request("http://localhost/cancel", {
+		const req = new Request("http://localhost/reservations/2", {
 			method: "DELETE",
-			body: JSON.stringify(data),
 			headers: {
 				loggedInDinerId: "1",
 			},
@@ -143,12 +139,8 @@ describe("cancel", () => {
 	});
 
 	test("returns 404 if reservation was not cancelled", async () => {
-		const data = {
-			reservationId: 2,
-		};
-		const req = new Request("http://localhost/cancel", {
+		const req = new Request("http://localhost/reservations/2", {
 			method: "DELETE",
-			body: JSON.stringify(data),
 			headers: {
 				loggedInDinerId: "1",
 			},

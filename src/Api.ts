@@ -1,5 +1,30 @@
+import { z } from "zod";
 import type { ReservationService } from "./ReservationService";
 import { encodeAvailabilityToken } from "./utils";
+
+const IdSchema = z.coerce.number().positive();
+
+const SearchRequestSchema = z.object({
+	diners: z.number().positive(),
+	dinerIds: z.number().array().nonempty(),
+	extraRestrictionIds: z.number().array(),
+	datetime: z.coerce.date(),
+});
+
+const AvailabilityTokenSchema = z.preprocess(
+	(val) => JSON.parse(atob(val as string)),
+	z.object({
+		diners: z.number().positive(),
+		dinerIds: z.number().array().nonempty(),
+		datetime: z.coerce.date(),
+		tables: z.record(z.string(), z.number().array().nonempty()),
+	}),
+);
+
+const ReserveRequestSchema = z.object({
+	restaurantId: IdSchema,
+	availabilityToken: AvailabilityTokenSchema,
+});
 
 export class Api {
 	private reservationService: ReservationService;
@@ -9,9 +34,16 @@ export class Api {
 	}
 
 	search = async (req: Request): Promise<Response> => {
-		const { diners, dinerIds, extraRestrictionIds, datetime } =
-			await req.json();
-		// validate input
+		const { success, data, error } = SearchRequestSchema.safeParse(
+			await req.json(),
+		);
+
+		if (!success) {
+			return new Response(JSON.stringify(error), { status: 400 });
+		}
+
+		const { diners, dinerIds, extraRestrictionIds, datetime } = data;
+
 		const tables = this.reservationService.search({
 			diners,
 			dinerIds,
@@ -33,12 +65,20 @@ export class Api {
 	};
 
 	reserve = async (req: Request): Promise<Response> => {
-		const dinerId = +(req.headers.get("loggedInDinerId") ?? 0) as number;
-		const { restaurantId, availabilityToken } = await req.json();
-		const { diners, dinerIds, datetime, tables } = JSON.parse(
-			atob(availabilityToken),
+		const dinerId = IdSchema.parse(req.headers.get("loggedInDinerId"));
+		const { success, data, error } = ReserveRequestSchema.safeParse(
+			await req.json(),
 		);
-		// TODO validate inputs
+
+		if (!success) {
+			return new Response(JSON.stringify(error), { status: 400 });
+		}
+
+		const {
+			restaurantId,
+			availabilityToken: { diners, dinerIds, datetime, tables },
+		} = data;
+
 		try {
 			const reservationId = this.reservationService.reserve(dinerId, {
 				restaurantId,
@@ -57,10 +97,11 @@ export class Api {
 
 	cancel = async (req: Request): Promise<Response> => {
 		const { pathname } = new URL(req.url);
-		const reservationId = Number(pathname.match(/\/reservations\/(\d+)/)?.[1]);
-		const dinerId = +(req.headers.get("loggedInDinerId") ?? 0) as number;
+		const reservationId = IdSchema.parse(
+			pathname.match(/\/reservations\/(\d+)/)?.[1],
+		);
+		const dinerId = IdSchema.parse(req.headers.get("loggedInDinerId"));
 
-		// TODO validate restaurantId and dinerId exist and are numbers
 		const wasCancelled = this.reservationService.cancel(reservationId, dinerId);
 
 		if (wasCancelled) {
