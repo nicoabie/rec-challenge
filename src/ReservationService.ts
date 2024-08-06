@@ -42,6 +42,7 @@ export class ReservationService {
 		},
 	): number => {
 		const { restaurantId, diners, dinerIds, datetime, tables } = details;
+
 		// we optimistically try to create a reservation with the result from search
 		let reservationId = this.repository.createReservation({
 			tableIds: tables[restaurantId],
@@ -56,11 +57,14 @@ export class ReservationService {
 				restaurantId,
 			});
 
-			reservationId = this.repository.createReservation({
-				tableIds: newTables[restaurantId],
-				capacity: diners,
-				datetime,
-			});
+            // do we have tables?
+            if (Object.keys(newTables).length) {
+                reservationId = this.repository.createReservation({
+                    tableIds: newTables[restaurantId],
+                    capacity: diners,
+                    datetime,
+                });
+            }
 
 			if (!reservationId) {
 				throw new Error(NO_TABLE_AVAILABLE);
