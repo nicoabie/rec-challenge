@@ -15,7 +15,6 @@ const server = Bun.serve({
 	port: 3000,
 	fetch(req) {
 		const url = new URL(req.url);
-		console.log(url.pathname);
 		// search could be a GET because we are not modifying anything on the system, just querying information.
 		// but we need to send a body with amount of diners, ids of friends and extra dietary restrictions for unregistered users
 		// and it would be messy to encode that in the query string

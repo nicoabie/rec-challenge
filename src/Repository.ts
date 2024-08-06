@@ -147,7 +147,7 @@ export class Repository {
 			WHERE 
 				-- seems bun does not have a way to do this yet or documentation does not mention it
 				-- this is dangerous and could be sql injected
-				AND d.id IN (${dinerIds})
+				d.id IN (${dinerIds})
 		`);
 
 		return (query.all() as { restrictions: number }[]).flatMap((i) =>
