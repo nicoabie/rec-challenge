@@ -7,3 +7,4 @@
 - add indexes
 - add cascade delete for reservations to diners_reservations
 - move db from repository to service and pass db instance on each method so control in correctly managed by the service
+- verify datetime is in the future

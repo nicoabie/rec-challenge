@@ -6,11 +6,25 @@ const repository: Partial<Repository> = {};
 const reservationService = new ReservationService(repository as Repository);
 
 describe("search", () => {
-	test("does the search", () => {
-		// @ts-ignore we do not care about function signature, just creating it to be spied upon
-		repository.findTables = () => {};
+	test("calls findTables with diners restriction ids + extra resctrictions ids ", () => {
+		// stub
+		repository.findDinersRestrictionIds = () => [3];
+
+		repository.findTables = () => ({});
 		const spy = spyOn(repository, "findTables");
-		reservationService.search();
-		expect(spy).toHaveBeenCalled();
+
+		const datetime = new Date();
+		reservationService.search({
+			diners: 2,
+			dinerIds: [1],
+			extraRestrictionIds: [2],
+			datetime,
+		});
+
+		expect(spy).toHaveBeenCalledWith({
+			capacity: 2,
+			datetime,
+			restrictionIds: [3, 2],
+		});
 	});
 });
