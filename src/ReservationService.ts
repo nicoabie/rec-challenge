@@ -10,11 +10,24 @@ export class ReservationService {
 		this.repository = repository;
 	}
 
-	search = () => {
-		this.repository.findTables({
-			capacity: 6,
-			datetime: new Date(),
-			restrictionIds: [],
+	search = (query: {
+		diners: number;
+		dinerIds: number[];
+		extraRestrictionIds: number[];
+		datetime: Date;
+	}): Record<string, number[]> => {
+		const { diners, dinerIds, extraRestrictionIds, datetime } = query;
+
+		const dinersRestrictionIds =
+			this.repository.findDinersRestrictionIds(dinerIds);
+		const restrictionIds = [
+			...new Set(dinersRestrictionIds.concat(extraRestrictionIds)),
+		];
+
+		return this.repository.findTables({
+			capacity: diners,
+			datetime,
+			restrictionIds,
 		});
 	};
 
@@ -27,7 +40,7 @@ export class ReservationService {
 			datetime: Date;
 			tables: Record<string, number[]>;
 		},
-	) => {
+	): number => {
 		const { restaurantId, diners, dinerIds, datetime, tables } = details;
 		// we optimistically try to create a reservation with the result from search
 		let reservationId = this.repository.createReservation({
@@ -65,6 +78,8 @@ export class ReservationService {
 			this.repository.deleteReservation(reservationId, dinerId);
 			throw new Error(NO_ALL_DINERS_AVAILABLE);
 		}
+
+		return reservationId;
 	};
 
 	cancel = (reservationId: number, dinerId: number) => {

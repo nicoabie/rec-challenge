@@ -1,4 +1,5 @@
 import type { ReservationService } from "./ReservationService";
+import { encodeAvailabilityToken } from "./utils";
 
 export class Api {
 	private reservationService: ReservationService;
@@ -7,9 +8,28 @@ export class Api {
 		this.reservationService = reservationService;
 	}
 
-	search = (req: Request): Response => {
-		const data = { restaurantIds: [2, 4], availabilityToken: "" };
-		return new Response(JSON.stringify(data));
+	search = async (req: Request): Promise<Response> => {
+		const { diners, dinerIds, extraRestrictionIds, datetime } =
+			await req.json();
+		// validate input
+		const tables = this.reservationService.search({
+			diners,
+			dinerIds,
+			extraRestrictionIds,
+			datetime,
+		});
+		const restaurantIds = Object.keys(tables);
+		if (restaurantIds.length) {
+			const availabilityToken = encodeAvailabilityToken({
+				diners,
+				dinerIds,
+				datetime,
+				tables,
+			});
+			const data = { restaurantIds, availabilityToken };
+			return new Response(JSON.stringify(data));
+		}
+		return new Response(null, { status: 404 });
 	};
 
 	reserve = async (req: Request): Promise<Response> => {
@@ -20,14 +40,14 @@ export class Api {
 		);
 		// TODO validate inputs
 		try {
-			const reservation = this.reservationService.reserve(dinerId, {
+			const reservationId = this.reservationService.reserve(dinerId, {
 				restaurantId,
 				diners,
 				dinerIds,
 				datetime,
 				tables,
 			});
-			return new Response(JSON.stringify(reservation), { status: 201 });
+			return new Response(JSON.stringify({ reservationId }), { status: 201 });
 		} catch (error) {
 			return new Response(JSON.stringify({ error: (error as Error).message }), {
 				status: 409,

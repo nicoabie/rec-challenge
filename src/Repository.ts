@@ -1,7 +1,7 @@
 import type { Database } from "bun:sqlite";
 import { addHours } from "date-fns/addHours";
 
-import { datetimeToISO8601, idsToBits } from "./utils";
+import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
 
 export class Repository {
 	private db: Database;
@@ -139,5 +139,19 @@ export class Repository {
 		});
 
 		return result.changes;
+	};
+
+	findDinersRestrictionIds = (dinerIds: number[]): number[] => {
+		const query = this.db.query(`
+			SELECT d.restrictions FROM diners d 
+			WHERE 
+				-- seems bun does not have a way to do this yet or documentation does not mention it
+				-- this is dangerous and could be sql injected
+				AND d.id IN (${dinerIds})
+		`);
+
+		return (query.all() as { restrictions: number }[]).flatMap((i) =>
+			bitsToIds(i.restrictions),
+		);
 	};
 }

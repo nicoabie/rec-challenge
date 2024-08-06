@@ -13,3 +13,26 @@ export const idsToBits = (ids: number[]): number => {
 	}
 	return result;
 };
+
+export const bitsToIds = (bits: number): number[] => {
+	const ids: number[] = [];
+	let position = 0;
+	let b = bits;
+
+	while (b !== 0) {
+		if (b & 1) {
+			ids.push(position + 1); // Add 1 since IDs start at 1
+		}
+		b >>= 1; // Shift bits to the right
+		position++;
+	}
+
+	return ids;
+};
+
+export const encodeAvailabilityToken = (data: {
+	diners: number;
+	dinerIds: number[];
+	datetime: Date;
+	tables: Record<string, number[]>;
+}) => btoa(JSON.stringify(data));
