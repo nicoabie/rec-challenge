@@ -57,14 +57,14 @@ export class ReservationService {
 				restaurantId,
 			});
 
-            // do we have tables?
-            if (Object.keys(newTables).length) {
-                reservationId = this.repository.createReservation({
-                    tableIds: newTables[restaurantId],
-                    capacity: diners,
-                    datetime,
-                });
-            }
+			// do we have tables?
+			if (Object.keys(newTables).length) {
+				reservationId = this.repository.createReservation({
+					tableIds: newTables[restaurantId],
+					capacity: diners,
+					datetime,
+				});
+			}
 
 			if (!reservationId) {
 				throw new Error(NO_TABLE_AVAILABLE);

@@ -2,6 +2,8 @@ import { z } from "zod";
 import type { ReservationService } from "./ReservationService";
 import { encodeAvailabilityToken } from "./utils";
 
+const INVALID_RESTAURANT_ID = "INVALID_RESTAURANT_ID";
+
 const IdSchema = z.coerce.number().positive();
 
 const SearchRequestSchema = z.object({
@@ -78,6 +80,12 @@ export class Api {
 			restaurantId,
 			availabilityToken: { diners, dinerIds, datetime, tables },
 		} = data;
+
+		if (!tables[restaurantId]) {
+			return new Response(JSON.stringify({ INVALID_RESTAURANT_ID }), {
+				status: 400,
+			});
+		}
 
 		try {
 			const reservationId = this.reservationService.reserve(dinerId, {
