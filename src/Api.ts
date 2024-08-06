@@ -56,8 +56,10 @@ export class Api {
 	};
 
 	cancel = async (req: Request): Promise<Response> => {
+		const { pathname } = new URL(req.url);
+		const reservationId = Number(pathname.match(/\/reservations\/(\d+)/)?.[1]);
 		const dinerId = +(req.headers.get("loggedInDinerId") ?? 0) as number;
-		const { reservationId } = await req.json();
+
 		// TODO validate restaurantId and dinerId exist and are numbers
 		const wasCancelled = this.reservationService.cancel(reservationId, dinerId);
 
