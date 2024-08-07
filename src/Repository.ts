@@ -138,8 +138,8 @@ export class Repository {
 		const result = query.run({
 			reservationId,
 			datetime: datetimeToISO8601(datetime),
-			minDatetime: datetimeToISO8601(addHours(datetime, -2)),
-			maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
+			minDatetime: datetimeToISO8601(addSeconds(addHours(datetime, -2), 1)),
+			maxDatetime: datetimeToISO8601(addSeconds(addHours(datetime, 2), -1)),
 		});
 
 		return result.changes;

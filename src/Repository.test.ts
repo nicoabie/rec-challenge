@@ -255,4 +255,131 @@ describe("repository", async () => {
 			expect(second).toBeNull();
 		});
 	});
+
+	describe("createReservationDinners", () => {
+		test("creates successfully the correct amount of reservation dinners if there are not other conflicting reservations", () => {
+			// pre
+			const datetime = new Date(2024, 7, 22, 20, 0, 0);
+			const reservationId = repository.createReservation({
+				capacity: 2,
+				datetime,
+				tableIds: [1], // lardos another day of the reservation lucile has with george michael
+			}) as number;
+
+			expect(reservationId).toBeInteger();
+
+			const inserts = repository.createResevationDiners({
+				reservationId,
+				datetime,
+				dinerIds: [3, 5],
+			});
+
+			expect(inserts).toBe(2);
+		});
+
+		test("creates less amount of diner reservations if there are other conflicting reservations", () => {
+			// pre
+			const datetime = new Date(2024, 7, 5, 20, 0, 0);
+			const reservationId = repository.createReservation({
+				capacity: 2,
+				datetime,
+				tableIds: [13], // table for two at Tetetlán
+			}) as number;
+
+			expect(reservationId).toBeInteger();
+
+			const inserts = repository.createResevationDiners({
+				reservationId,
+				datetime,
+				dinerIds: [3, 5],
+			});
+
+			// lucile forgot she had a reservation at the same time with george michael at Lardos
+			expect(inserts).toBe(1);
+		});
+
+		test("creates less amount of diner reservations if there are other conflicting reservations less than two hours before", () => {
+			// pre
+			const datetime = new Date(2024, 7, 5, 18, 0, 1);
+			const reservationId = repository.createReservation({
+				capacity: 2,
+				datetime,
+				tableIds: [13], // table for two at Tetetlán
+			}) as number;
+
+			expect(reservationId).toBeInteger();
+
+			const inserts = repository.createResevationDiners({
+				reservationId,
+				datetime,
+				dinerIds: [3, 5],
+			});
+
+			// lucile forgot she had a reservation at the same time with george michael at Lardos
+			expect(inserts).toBe(1);
+		});
+
+		test("creates less amount of diner reservations if there are other conflicting reservations less than two hours after", () => {
+			// pre
+			const datetime = new Date(2024, 7, 5, 21, 59, 59);
+			const reservationId = repository.createReservation({
+				capacity: 2,
+				datetime,
+				tableIds: [13], // table for two at Tetetlán
+			}) as number;
+
+			expect(reservationId).toBeInteger();
+
+			const inserts = repository.createResevationDiners({
+				reservationId,
+				datetime,
+				dinerIds: [3, 5],
+			});
+
+			// lucile forgot she had a reservation at the same time with george michael at Lardos
+			expect(inserts).toBe(1);
+		});
+
+		// we hope lucile can get fast from lardos to Tetetlán
+		test("creates the correct amount of diner reservations 2hs after conflicting reservations", () => {
+			// pre
+			const datetime = new Date(2024, 7, 5, 22, 0, 0);
+			const reservationId = repository.createReservation({
+				capacity: 2,
+				datetime,
+				tableIds: [13], // table for two at Tetetlán
+			}) as number;
+
+			expect(reservationId).toBeInteger();
+
+			const inserts = repository.createResevationDiners({
+				reservationId,
+				datetime,
+				dinerIds: [3, 5],
+			});
+
+			expect(inserts).toBe(2);
+		});
+
+		// we hope lucile can get fast from Tetetlán to Lardos
+		test("creates the correct amount of diner reservations 2hs before conflicting reservations", () => {
+			// pre
+			const datetime = new Date(2024, 7, 5, 18, 0, 0);
+			const reservationId = repository.createReservation({
+				capacity: 2,
+				datetime,
+				tableIds: [13], // table for two at Tetetlán
+			}) as number;
+
+			expect(reservationId).toBeInteger();
+
+			const inserts = repository.createResevationDiners({
+				reservationId,
+				datetime,
+				dinerIds: [3, 5],
+			});
+
+			expect(inserts).toBe(2);
+		});
+	});
 });
