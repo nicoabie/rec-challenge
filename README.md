@@ -10,6 +10,7 @@ bun install
 
 To create a sqlite db file:
 ```shell
+cat schema.sql | sqlite3 db.sqlite
 cat seed.sql | sqlite3 db.sqlite
 ```
 

@@ -56,3 +56,10 @@ insert into tables (restaurant_id, capacity) values (4, 6);
 
 insert into tables (restaurant_id, capacity) values (5, 2);
 insert into tables (restaurant_id, capacity) values (5, 2);
+
+
+-- george michael and lucile have a reservation with other 4 (incognitos) at lardo
+insert into reservations (restaurant_id, table_id, capacity, datetime) values (1, 7, 6, '2024-08-05 20:00:00');
+insert into diners_reservations (diner_id, reservation_id, datetime) values (2, 1, '2024-08-05 20:00:00');
+insert into diners_reservations (diner_id, reservation_id, datetime) values (3,
+ 1, '2024-08-05 20:00:00');

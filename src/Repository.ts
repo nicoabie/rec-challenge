@@ -2,6 +2,7 @@ import type { Database } from "bun:sqlite";
 import { addHours } from "date-fns/addHours";
 
 import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
+import { addSeconds } from "date-fns/addSeconds";
 
 export class Repository {
 	private db: Database;
@@ -40,8 +41,8 @@ export class Repository {
 
 		const items = query.all({
 			capacity,
-			minDatetime: datetimeToISO8601(addHours(datetime, -2)),
-			maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
+			minDatetime: datetimeToISO8601(addSeconds(addHours(datetime, -2), 1)),
+			maxDatetime: datetimeToISO8601(addSeconds(addHours(datetime, 2), -1)),
 			...(restrictionIds && { restrictions: idsToBits(restrictionIds) }),
 			...(restaurantId && { restaurantId }),
 		}) as { id: number; restaurant_id: number }[];
