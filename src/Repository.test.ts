@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { describe, expect, test, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { Repository } from "./Repository";
 
 let db: Database;
@@ -19,7 +19,7 @@ describe("repository", async () => {
 		db.run(scenariosText);
 	});
 
-	describe("findTables", async () => {
+	describe("findTables", () => {
 		test("no tables for 8 diners", () => {
 			const result = repository.findTables({
 				capacity: 8,
@@ -80,7 +80,7 @@ describe("repository", async () => {
 				restaurantId: 1,
 			});
 			expect(result).toEqual({
-				"1": [ 7 ],
+				"1": [7],
 			});
 		});
 
@@ -100,7 +100,7 @@ describe("repository", async () => {
 				restaurantId: 1,
 			});
 			expect(result).toEqual({
-				"1": [ 7 ],
+				"1": [7],
 			});
 		});
 
@@ -113,4 +113,22 @@ describe("repository", async () => {
 			expect(result).toBeEmptyObject();
 		});
 	});
+
+	describe("deleteReservation", () => {
+		test("cannot delete old reservation", () => {
+			const result = repository.deleteReservation(1, 2);
+			expect(result).toBeFalse();
+		});
+
+		test("can delete future reservation if part of the diners", () => {
+			const result = repository.deleteReservation(2, 2);
+			expect(result).toBeTrue();
+		});
+
+		test("cannot delete future reservation if not part of the diners", () => {
+			// Gob was not invited
+			const result = repository.deleteReservation(2, 4);
+			expect(result).toBeFalse();
+		});
+	})
 });

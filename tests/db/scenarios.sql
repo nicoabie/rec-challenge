@@ -61,5 +61,9 @@ insert into tables (restaurant_id, capacity) values (5, 2);
 -- george michael and lucile have a reservation with other 4 (incognitos) at lardo
 insert into reservations (restaurant_id, table_id, capacity, datetime) values (1, 7, 6, '2024-08-05 20:00:00');
 insert into diners_reservations (diner_id, reservation_id, datetime) values (2, 1, '2024-08-05 20:00:00');
-insert into diners_reservations (diner_id, reservation_id, datetime) values (3,
- 1, '2024-08-05 20:00:00');
+insert into diners_reservations (diner_id, reservation_id, datetime) values (3, 1, '2024-08-05 20:00:00');
+
+ -- george michael and lucile reservation to test deleting a reservation into the future
+insert into reservations (restaurant_id, table_id, capacity, datetime) values (1, 1, 6, '2130-08-05 20:00:00');
+insert into diners_reservations (diner_id, reservation_id, datetime) values (2, 2, '2130-08-05 20:00:00');
+insert into diners_reservations (diner_id, reservation_id, datetime) values (3, 2, '2130-08-05 20:00:00');
