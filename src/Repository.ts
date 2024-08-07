@@ -95,6 +95,9 @@ export class Repository {
 				-- seems bun does not have a way to do this yet or documentation does not mention it
 				-- this is dangerous and could be sql injected
 				AND t.id IN (${tableIds})
+				-- the tablesIds should only contain tables with the specified capacity be cause they came from a previous search
+				-- but it is not bad to make sure
+				AND t.capacity >= $capacity
 			-- this is on purpose to offer smaller tables first
 			ORDER BY t.capacity ASC
 			LIMIT 1; 
@@ -103,8 +106,8 @@ export class Repository {
 		const result = query.run({
 			datetime: datetimeToISO8601(datetime),
 			capacity,
-			minDatetime: datetimeToISO8601(addHours(datetime, -2)),
-			maxDatetime: datetimeToISO8601(addHours(datetime, 2)),
+			minDatetime: datetimeToISO8601(addSeconds(addHours(datetime, -2), 1)),
+			maxDatetime: datetimeToISO8601(addSeconds(addHours(datetime, 2), -1)),
 		});
 
 		if (result.changes) {

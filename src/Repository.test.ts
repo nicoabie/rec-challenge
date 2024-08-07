@@ -130,5 +130,129 @@ describe("repository", async () => {
 			const result = repository.deleteReservation(2, 4);
 			expect(result).toBeFalse();
 		});
-	})
+	});
+
+	describe("createReservation", () => {
+		test("creates successfully a reservation at lardos taking the smallest table for 2", () => {
+			const id = repository.createReservation({
+				capacity: 2,
+				datetime: new Date(2024, 7, 21),
+				tableIds: [7, 5, 1],
+			});
+
+			expect(id).toBeInteger();
+
+			const res = db
+				.query("select table_id from reservations where id = ?")
+				.get(id) as { table_id: number };
+
+			expect(res.table_id).toBe(1);
+		});
+
+		test("creates successfully a reservation at lardos taking the smallest table for 4", () => {
+			const id = repository.createReservation({
+				capacity: 4,
+				datetime: new Date(2024, 7, 21),
+				tableIds: [7, 5, 1],
+			});
+
+			expect(id).toBeInteger();
+
+			const res = db
+				.query("select table_id from reservations where id = ?")
+				.get(id) as { table_id: number };
+
+			expect(res.table_id).toBe(5);
+		});
+
+		test("cannot create two reservation at the same time for 6 at lardos", () => {
+			const first = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21),
+				tableIds: [7],
+			});
+
+			expect(first).toBeInteger();
+
+			const second = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21),
+				tableIds: [7],
+			});
+
+			expect(second).toBeNull();
+		});
+
+		test("can create a second reservation 2 hours after", () => {
+			const first = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 18, 0, 0),
+				tableIds: [7],
+			});
+
+			expect(first).toBeInteger();
+
+			const second = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 20, 0, 0),
+				tableIds: [7],
+			});
+
+			expect(second).toBeInteger();
+		});
+
+		test("can create a second reservation 2 hours before", () => {
+			const first = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 18, 0, 0),
+				tableIds: [7],
+			});
+
+			expect(first).toBeInteger();
+
+			const second = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 16, 0, 0),
+				tableIds: [7],
+			});
+
+			expect(second).toBeInteger();
+		});
+
+		test("cannot create a second reservation 1 second before 2 hours after", () => {
+			const first = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 18, 0, 0),
+				tableIds: [7],
+			});
+
+			expect(first).toBeInteger();
+
+			const second = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 19, 59, 59),
+				tableIds: [7],
+			});
+
+			expect(second).toBeNull();
+		});
+
+		test("cannot create a second reservation 1 second after 2 hours before", () => {
+			const first = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 18, 0, 0),
+				tableIds: [7],
+			});
+
+			expect(first).toBeInteger();
+
+			const second = repository.createReservation({
+				capacity: 6,
+				datetime: new Date(2024, 7, 21, 16, 0, 1),
+				tableIds: [7],
+			});
+
+			expect(second).toBeNull();
+		});
+	});
 });
