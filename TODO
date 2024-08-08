@@ -1,4 +1,3 @@
 - when searching also check dinerIds are able to book in that timeframe, there are not other reservations
 - try to remove unsafe sql (directly passing argument to IN)
 - utils tests
-- add indexes

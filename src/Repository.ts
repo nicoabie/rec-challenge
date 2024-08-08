@@ -63,7 +63,7 @@ export class Repository {
 				SELECT dr.reservation_id FROM diners_reservations dr 
 				WHERE
 					dr.reservation_id = $reservationId
-					-- all attendees in the platform can delete the reservation
+					-- any diner in the reservation can delete the reservation
 					AND dr.diner_id = $dinerId
 					-- we won't allow cancelling passed reservations
 					AND dr.datetime > datetime('now')
