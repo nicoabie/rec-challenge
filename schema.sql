@@ -30,6 +30,7 @@ CREATE TABLE tables (
 DROP TABLE IF EXISTS reservations;
 CREATE TABLE reservations (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  -- this could be here or not, we can get the restaurant_id from the table but for reporting processes avoiding JOINs could be beneficial
   restaurant_id INTEGER NOT NULL,
   table_id INTEGER NOT NULL,
   -- it may be the case that we gave a bigger table, it is nice to store the actual capacity in case a smaller table gets freed and we can move the reservation to not waste places

@@ -1,11 +1,10 @@
 - when searching also check dinerIds are able to book in that timeframe, there are not other reservations
 - try to remove unsafe sql (directly passing argument to IN)
 - reservation service tests
-- repository tests
 - utils tests
 - add FKs 
 - add indexes
 - add cascade delete for reservations to diners_reservations
-- move db from repository to service and pass db instance on each method so control in correctly managed by the service
 - verify datetime is in the future when creating reservation
 - it may be the case where a reservation gets created diners other than logged in diner because he has another reservation, we need a force delete to delete those reservations
+- declare methods as methods in classes and not as props with = 

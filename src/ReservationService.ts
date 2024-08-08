@@ -1,3 +1,4 @@
+import type { Database } from "bun:sqlite";
 import type { Repository } from "./Repository";
 
 const NO_TABLE_AVAILABLE = "NO_TABLE_AVAILABLE";
@@ -5,9 +6,11 @@ const NO_ALL_DINERS_AVAILABLE = "NO_ALL_DINERS_AVAILABLE";
 
 export class ReservationService {
 	private repository: Repository;
+	private db: Database;
 
-	constructor(repository: Repository) {
+	constructor(repository: Repository, db: Database) {
 		this.repository = repository;
+		this.db = db;
 	}
 
 	search = (query: {
@@ -18,13 +21,15 @@ export class ReservationService {
 	}): Record<string, number[]> => {
 		const { diners, dinerIds, extraRestrictionIds, datetime } = query;
 
-		const dinersRestrictionIds =
-			this.repository.findDinersRestrictionIds(dinerIds);
+		const dinersRestrictionIds = this.repository.findDinersRestrictionIds(
+			this.db,
+			dinerIds,
+		);
 		const restrictionIds = [
 			...new Set(dinersRestrictionIds.concat(extraRestrictionIds)),
 		];
 
-		return this.repository.findTables({
+		return this.repository.findTables(this.db, {
 			capacity: diners,
 			datetime,
 			restrictionIds,
@@ -44,14 +49,14 @@ export class ReservationService {
 		const { restaurantId, diners, dinerIds, datetime, tables } = details;
 
 		// we optimistically try to create a reservation with the result from search
-		let reservationId = this.repository.createReservation({
+		let reservationId = this.repository.createReservation(this.db, {
 			tableIds: tables[restaurantId],
 			capacity: diners,
 			datetime,
 		});
 		if (!reservationId) {
 			// we search again to see if a table got available
-			const newTables = this.repository.findTables({
+			const newTables = this.repository.findTables(this.db, {
 				capacity: diners,
 				datetime,
 				restaurantId,
@@ -59,7 +64,7 @@ export class ReservationService {
 
 			// do we have tables?
 			if (Object.keys(newTables).length) {
-				reservationId = this.repository.createReservation({
+				reservationId = this.repository.createReservation(this.db, {
 					tableIds: newTables[restaurantId],
 					capacity: diners,
 					datetime,
@@ -71,7 +76,7 @@ export class ReservationService {
 			}
 		}
 
-		const createdDiners = this.repository.createResevationDiners({
+		const createdDiners = this.repository.createResevationDiners(this.db, {
 			reservationId,
 			dinerIds,
 			datetime,
@@ -79,7 +84,7 @@ export class ReservationService {
 
 		if (createdDiners !== dinerIds.length) {
 			// some diners had a conflicting reservation, cancelling...
-			this.repository.deleteReservation(reservationId, dinerId);
+			this.repository.deleteReservation(this.db, { reservationId, dinerId });
 			throw new Error(NO_ALL_DINERS_AVAILABLE);
 		}
 
@@ -87,6 +92,9 @@ export class ReservationService {
 	};
 
 	cancel = (reservationId: number, dinerId: number) => {
-		return this.repository.deleteReservation(reservationId, dinerId);
+		return this.repository.deleteReservation(this.db, {
+			reservationId,
+			dinerId,
+		});
 	};
 }

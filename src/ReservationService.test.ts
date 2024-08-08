@@ -1,9 +1,11 @@
+import { Database } from "bun:sqlite";
 import { describe, expect, spyOn, test } from "bun:test";
 import type { Repository } from "./Repository";
 import { ReservationService } from "./ReservationService";
 
 const repository: Partial<Repository> = {};
-const reservationService = new ReservationService(repository as Repository);
+const db = new Database(":memory:", { strict: true });
+const reservationService = new ReservationService(repository as Repository, db);
 
 describe("search", () => {
 	test("calls findTables with diners restriction ids + extra resctrictions ids ", () => {
@@ -21,7 +23,7 @@ describe("search", () => {
 			datetime,
 		});
 
-		expect(spy).toHaveBeenCalledWith({
+		expect(spy).toHaveBeenCalledWith(db, {
 			capacity: 2,
 			datetime,
 			restrictionIds: [3, 2],

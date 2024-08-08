@@ -7,8 +7,8 @@ import { ReservationService } from "./src/ReservationService";
 // there are fancier ways to do this using DI or factories.
 // this is very easy to understand and we don't want overly complex solutions
 const db = new Database("db.sqlite", { strict: true });
-const repository = new Repository(db);
-const reservationService = new ReservationService(repository);
+const repository = new Repository();
+const reservationService = new ReservationService(repository, db);
 const api = new Api(reservationService);
 
 const server = Bun.serve({

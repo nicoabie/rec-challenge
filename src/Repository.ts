@@ -5,24 +5,21 @@ import { addSeconds } from "date-fns/addSeconds";
 import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
 
 export class Repository {
-	private db: Database;
-
-	constructor(db: Database) {
-		this.db = db;
-	}
-
-	findTables = (search: {
-		capacity: number;
-		datetime: Date;
-		restrictionIds?: number[];
-		restaurantId?: number;
-	}): Record<string, number[]> => {
+	findTables = (
+		db: Database,
+		search: {
+			capacity: number;
+			datetime: Date;
+			restrictionIds?: number[];
+			restaurantId?: number;
+		},
+	): Record<string, number[]> => {
 		// this method can be used either specifying restrictionIds when doing the search
 		// OR specifying a restaurantId if when optimistically trying to create a reservation it couldn't
 		// and we need to search for more tables
 		const { capacity, datetime, restrictionIds, restaurantId } = search;
 
-		const query = this.db.query(`
+		const query = db.query(`
 			SELECT
 				t.id,
 				t.restaurant_id
@@ -54,10 +51,13 @@ export class Repository {
 		);
 	};
 
-	deleteReservation = (reservationId: number, dinerId: number): boolean => {
+	deleteReservation = (
+		db: Database,
+		info: { reservationId: number; dinerId: number },
+	): boolean => {
 		// we could implement soft deletes with a deletedAt column but I believe for the context of the problem
 		// it makes more sense to hard delete. maintaining cancelled reservations adds no value and makes searching and reservation harder
-		const query = this.db.query(`
+		const query = db.query(`
 			DELETE FROM reservations 
 			WHERE id IN (
 				SELECT dr.reservation_id FROM diners_reservations dr 
@@ -70,6 +70,7 @@ export class Repository {
 				)
 		`);
 
+		const { reservationId, dinerId } = info;
 		const result = query.run({
 			reservationId,
 			dinerId,
@@ -78,14 +79,17 @@ export class Repository {
 		return !!result.changes;
 	};
 
-	createReservation = (info: {
-		tableIds: number[];
-		capacity: number;
-		datetime: Date;
-	}): number | null => {
+	createReservation = (
+		db: Database,
+		info: {
+			tableIds: number[];
+			capacity: number;
+			datetime: Date;
+		},
+	): number | null => {
 		const { tableIds, capacity, datetime } = info;
 
-		const query = this.db.query(`
+		const query = db.query(`
 			INSERT INTO reservations (restaurant_id, table_id, capacity, datetime) 
 			SELECT t.restaurant_id, t.id, $capacity, $datetime FROM tables t 
 				LEFT JOIN reservations ON t.id = reservations.table_id
@@ -116,14 +120,17 @@ export class Repository {
 		return null;
 	};
 
-	createResevationDiners = (info: {
-		reservationId: number;
-		dinerIds: number[];
-		datetime: Date;
-	}) => {
+	createResevationDiners = (
+		db: Database,
+		info: {
+			reservationId: number;
+			dinerIds: number[];
+			datetime: Date;
+		},
+	) => {
 		const { reservationId, dinerIds, datetime } = info;
 
-		const query = this.db.query(`
+		const query = db.query(`
 			INSERT INTO diners_reservations (diner_id, reservation_id, datetime) 
 			SELECT d.id, $reservationId, $datetime FROM diners d 
 				LEFT JOIN diners_reservations ON d.id = diners_reservations.diner_id
@@ -145,8 +152,8 @@ export class Repository {
 		return result.changes;
 	};
 
-	findDinersRestrictionIds = (dinerIds: number[]): number[] => {
-		const query = this.db.query(`
+	findDinersRestrictionIds = (db: Database, dinerIds: number[]): number[] => {
+		const query = db.query(`
 			SELECT d.restrictions FROM diners d 
 			WHERE 
 				-- seems bun does not have a way to do this yet or documentation does not mention it
