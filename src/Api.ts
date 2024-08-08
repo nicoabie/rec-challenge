@@ -46,24 +46,30 @@ export class Api {
 
 		const { diners, dinerIds, extraRestrictionIds, datetime } = data;
 
-		const tables = this.reservationService.search({
-			diners,
-			dinerIds,
-			extraRestrictionIds,
-			datetime,
-		});
-		const restaurantIds = Object.keys(tables);
-		if (restaurantIds.length) {
-			const availabilityToken = encodeAvailabilityToken({
+		try {
+			const tables = this.reservationService.search({
 				diners,
 				dinerIds,
+				extraRestrictionIds,
 				datetime,
-				tables,
 			});
-			const data = { restaurantIds, availabilityToken };
-			return new Response(JSON.stringify(data));
+			const restaurantIds = Object.keys(tables);
+			if (restaurantIds.length) {
+				const availabilityToken = encodeAvailabilityToken({
+					diners,
+					dinerIds,
+					datetime,
+					tables,
+				});
+				const data = { restaurantIds, availabilityToken };
+				return new Response(JSON.stringify(data));
+			}
+			return new Response(null, { status: 404 });
+		} catch (error) {
+			return new Response(JSON.stringify({ error: (error as Error).message }), {
+				status: 409,
+			});
 		}
-		return new Response(null, { status: 404 });
 	}
 
 	async reserve(req: Request): Promise<Response> {

@@ -62,6 +62,22 @@ describe("search", () => {
 		const res = await api.search(req);
 		expect(res.status).toBe(404);
 	});
+
+	test("returns 409 if it throws erorr (wrong date or diners with reservations)", async () => {
+		const req = new Request("http://localhost/search", {
+			method: "POST",
+			body: JSON.stringify(data),
+			headers: {
+				loggedInDinerId: "1",
+			},
+		});
+
+		//stub
+		reservationService.search = () => { throw new Error() };
+
+		const res = await api.search(req);
+		expect(res.status).toBe(409);
+	});
 });
 
 describe("reserve", () => {
