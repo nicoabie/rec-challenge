@@ -35,7 +35,7 @@ export class Api {
 		this.reservationService = reservationService;
 	}
 
-	search = async (req: Request): Promise<Response> => {
+	async search(req: Request): Promise<Response> {
 		const { success, data, error } = SearchRequestSchema.safeParse(
 			await req.json(),
 		);
@@ -64,9 +64,9 @@ export class Api {
 			return new Response(JSON.stringify(data));
 		}
 		return new Response(null, { status: 404 });
-	};
+	}
 
-	reserve = async (req: Request): Promise<Response> => {
+	async reserve(req: Request): Promise<Response> {
 		const dinerId = IdSchema.parse(req.headers.get("loggedInDinerId"));
 		const { success, data, error } = ReserveRequestSchema.safeParse(
 			await req.json(),
@@ -101,9 +101,9 @@ export class Api {
 				status: 409,
 			});
 		}
-	};
+	}
 
-	cancel = async (req: Request): Promise<Response> => {
+	async cancel(req: Request): Promise<Response> {
 		const { pathname } = new URL(req.url);
 		const reservationId = IdSchema.parse(
 			pathname.match(/\/reservations\/(\d+)/)?.[1],
@@ -116,5 +116,5 @@ export class Api {
 			return new Response(null, { status: 204 });
 		}
 		return new Response(null, { status: 404 });
-	};
+	}
 }

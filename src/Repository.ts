@@ -5,7 +5,7 @@ import { addSeconds } from "date-fns/addSeconds";
 import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
 
 export class Repository {
-	findTables = (
+	findTables(
 		db: Database,
 		search: {
 			capacity: number;
@@ -13,7 +13,7 @@ export class Repository {
 			restrictionIds?: number[];
 			restaurantId?: number;
 		},
-	): Record<string, number[]> => {
+	): Record<string, number[]> {
 		// this method can be used either specifying restrictionIds when doing the search
 		// OR specifying a restaurantId if when optimistically trying to create a reservation it couldn't
 		// and we need to search for more tables
@@ -49,12 +49,12 @@ export class Repository {
 				([keys, values]) => [keys, values?.map((v) => v.id) ?? []],
 			),
 		);
-	};
+	}
 
-	deleteReservation = (
+	deleteReservation(
 		db: Database,
 		info: { reservationId: number; dinerId: number },
-	): boolean => {
+	): boolean {
 		// we could implement soft deletes with a deletedAt column but I believe for the context of the problem
 		// it makes more sense to hard delete. maintaining cancelled reservations adds no value and makes searching and reservation harder
 		const query = db.query(`
@@ -77,16 +77,16 @@ export class Repository {
 		});
 
 		return !!result.changes;
-	};
+	}
 
-	createReservation = (
+	createReservation(
 		db: Database,
 		info: {
 			tableIds: number[];
 			capacity: number;
 			datetime: Date;
 		},
-	): number | null => {
+	): number | null {
 		const { tableIds, capacity, datetime } = info;
 
 		const query = db.query(`
@@ -118,16 +118,16 @@ export class Repository {
 			return result.lastInsertRowid as number;
 		}
 		return null;
-	};
+	}
 
-	createResevationDiners = (
+	createResevationDiners(
 		db: Database,
 		info: {
 			reservationId: number;
 			dinerIds: number[];
 			datetime: Date;
 		},
-	) => {
+	) {
 		const { reservationId, dinerIds, datetime } = info;
 
 		const query = db.query(`
@@ -150,9 +150,9 @@ export class Repository {
 		});
 
 		return result.changes;
-	};
+	}
 
-	findDinersRestrictionIds = (db: Database, dinerIds: number[]): number[] => {
+	findDinersRestrictionIds(db: Database, dinerIds: number[]): number[] {
 		const query = db.query(`
 			SELECT d.restrictions FROM diners d 
 			WHERE 
@@ -164,5 +164,5 @@ export class Repository {
 		return (query.all() as { restrictions: number }[]).flatMap((i) =>
 			bitsToIds(i.restrictions),
 		);
-	};
+	}
 }

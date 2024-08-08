@@ -13,12 +13,12 @@ export class ReservationService {
 		this.db = db;
 	}
 
-	search = (query: {
+	search(query: {
 		diners: number;
 		dinerIds: number[];
 		extraRestrictionIds: number[];
 		datetime: Date;
-	}): Record<string, number[]> => {
+	}): Record<string, number[]> {
 		const { diners, dinerIds, extraRestrictionIds, datetime } = query;
 
 		const dinersRestrictionIds = this.repository.findDinersRestrictionIds(
@@ -34,9 +34,9 @@ export class ReservationService {
 			datetime,
 			restrictionIds,
 		});
-	};
+	}
 
-	reserve = (
+	reserve(
 		dinerId: number,
 		details: {
 			restaurantId: number;
@@ -45,7 +45,7 @@ export class ReservationService {
 			datetime: Date;
 			tables: Record<string, number[]>;
 		},
-	): number => {
+	): number {
 		const { restaurantId, diners, dinerIds, datetime, tables } = details;
 
 		// we optimistically try to create a reservation with the result from search
@@ -89,12 +89,12 @@ export class ReservationService {
 		}
 
 		return reservationId;
-	};
+	}
 
-	cancel = (reservationId: number, dinerId: number) => {
+	cancel(reservationId: number, dinerId: number) {
 		return this.repository.deleteReservation(this.db, {
 			reservationId,
 			dinerId,
 		});
-	};
+	}
 }
