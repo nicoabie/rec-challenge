@@ -2,4 +2,3 @@
 - try to remove unsafe sql (directly passing argument to IN)
 - utils tests
 - add indexes
-- add cascade delete for reservations to diners_reservations

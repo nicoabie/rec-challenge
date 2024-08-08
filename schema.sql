@@ -1,3 +1,6 @@
+-- foreign keys checks therefore cascades are not enabled by default in sqlite
+PRAGMA foreign_keys = ON;
+
 -- intentionally encode restrictions into diners table
 -- I know it is not normalized BUT I save joins
 -- restrictions are encoded into integers for faster querying with bitwise operations than other string representations and using LIKE
@@ -52,7 +55,7 @@ CREATE TABLE diners_reservations (
   -- and for archiving past records too
   datetime DATETIME,
   CONSTRAINT fk_diner_id FOREIGN KEY (diner_id) REFERENCES diners (id), 
-  CONSTRAINT fk_reservation_id FOREIGN KEY (reservation_id) REFERENCES reservations (id)
+  CONSTRAINT fk_reservation_id FOREIGN KEY (reservation_id) REFERENCES reservations (id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS restrictions;
