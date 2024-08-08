@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { datetimeToISO8601, idsToBits } from "./utils";
+import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
 
 describe("datetimeToISO8601", () => {
 	test("serializes correctly", () => {
@@ -10,8 +10,9 @@ describe("datetimeToISO8601", () => {
 	});
 });
 
+// for idsToBits and bitsToIds we could use something like https://github.com/dubzzz/fast-check to generate many test cases
+
 describe("idsToBits", () => {
-	// ideally we should create more tests, we could use something like https://github.com/dubzzz/fast-check to generate many test cases
 	test("serializes correctly zero ids", () => {
 		expect(idsToBits([])).toBe(0);
 	});
@@ -24,3 +25,17 @@ describe("idsToBits", () => {
 		expect(idsToBits([1, 3])).toBe(5);
 	});
 });
+
+describe("bitsToIds", () => {
+	test("deserializes correctly zero", () => {
+		expect(bitsToIds(0)).toMatchObject([]);
+	});
+
+	test("deserializes correctly 1", () => {
+		expect(bitsToIds(1)).toMatchObject([1]);
+	});
+
+	test("deserializes correctly 5", () => {
+		expect(bitsToIds(5)).toMatchObject([1, 3]);
+	});
+})
