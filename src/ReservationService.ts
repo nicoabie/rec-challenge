@@ -1,8 +1,15 @@
 import type { Database } from "bun:sqlite";
+import { isBefore } from "date-fns";
 import type { Repository } from "./Repository";
 
 const NO_TABLE_AVAILABLE = "NO_TABLE_AVAILABLE";
 const NOT_ALL_DINERS_AVAILABLE = "NOT_ALL_DINERS_AVAILABLE";
+const DATE_SHOULD_BE_IN_THE_FUTURE = "DATE_SHOULD_BE_IN_THE_FUTURE";
+
+// this service throws exceptions to flag business requirements not being met.
+// I did that because most people are used to exceptions.
+// Personally I prefer error as values ie using either monad but js does not support that natively and I would have to add a library for that.
+// and let exceptions to flag unrecoverable scenarios -> something that will end in a 5xx status code
 
 export class ReservationService {
 	private repository: Repository;
@@ -20,6 +27,10 @@ export class ReservationService {
 		datetime: Date;
 	}): Record<string, number[]> {
 		const { diners, dinerIds, extraRestrictionIds, datetime } = query;
+
+		if (isBefore(datetime, new Date())) {
+			throw new Error(DATE_SHOULD_BE_IN_THE_FUTURE);
+		}
 
 		const dinersRestrictionIds = this.repository.findDinersRestrictionIds(
 			this.db,
@@ -44,6 +55,10 @@ export class ReservationService {
 		tables: Record<string, number[]>;
 	}): number {
 		const { restaurantId, diners, dinerIds, datetime, tables } = details;
+
+		if (isBefore(datetime, new Date())) {
+			throw new Error(DATE_SHOULD_BE_IN_THE_FUTURE);
+		}
 
 		// about how this method is implemented:
 		// the sqlite driver for bun is synchronous and If I were to only have one instance of the server that would make it possible to first check

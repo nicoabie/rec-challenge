@@ -67,7 +67,6 @@ export class Api {
 	}
 
 	async reserve(req: Request): Promise<Response> {
-		const dinerId = IdSchema.parse(req.headers.get("loggedInDinerId"));
 		const { success, data, error } = ReserveRequestSchema.safeParse(
 			await req.json(),
 		);

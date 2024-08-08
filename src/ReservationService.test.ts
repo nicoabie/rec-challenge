@@ -1,5 +1,13 @@
 import { Database } from "bun:sqlite";
-import { describe, expect, mock, test } from "bun:test";
+import {
+	afterAll,
+	beforeAll,
+	describe,
+	expect,
+	mock,
+	setSystemTime,
+	test,
+} from "bun:test";
 import type { Repository } from "./Repository";
 import { ReservationService } from "./ReservationService";
 
@@ -7,14 +15,36 @@ const repository: Partial<Repository> = {};
 const db = new Database(":memory:", { strict: true });
 const reservationService = new ReservationService(repository as Repository, db);
 
+beforeAll(() => {
+	// very cool, I don't remember node having this out of the box
+	setSystemTime(new Date("2024-08-08T00:00:00.000Z"));
+});
+
+afterAll(() => {
+	// very important to reset this because it is set globally and not for this single file
+	// it would be very nice if bun did that automatically created an issue for that https://github.com/oven-sh/bun/issues/13173
+	setSystemTime();
+});
+
 describe("search", () => {
-	test("calls findTables with diners restriction ids + extra resctrictions ids ", () => {
+	test("throws if date is before than system time", () => {
+		expect(() => {
+			reservationService.search({
+				diners: 2,
+				dinerIds: [1],
+				extraRestrictionIds: [2],
+				datetime: new Date(2024, 7, 7, 20, 0, 0),
+			});
+		}).toThrowError("DATE_SHOULD_BE_IN_THE_FUTURE");
+	});
+
+	test("calls findTables with diners restriction ids + extra resctrictions ids", () => {
 		// stub
 		repository.findDinersRestrictionIds = () => [3];
 
 		repository.findTables = mock(() => ({}));
 
-		const datetime = new Date();
+		const datetime = new Date(2024, 7, 8, 20, 0, 0);
 		reservationService.search({
 			diners: 2,
 			dinerIds: [1],
@@ -31,6 +61,18 @@ describe("search", () => {
 });
 
 describe("reserve", () => {
+	test("throws if date is before than system time", () => {
+		expect(() => {
+			reservationService.reserve({
+				restaurantId: 1,
+				diners: 2,
+				dinerIds: [1],
+				datetime: new Date(2024, 7, 7, 20, 0, 0),
+				tables: { 1: [1, 2] },
+			});
+		}).toThrowError("DATE_SHOULD_BE_IN_THE_FUTURE");
+	});
+
 	test("reservation gets created optimistically", () => {
 		repository.createReservation = mock(() => 1);
 		repository.createReservationDiners = mock(() => 1);

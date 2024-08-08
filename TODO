@@ -4,4 +4,3 @@
 - add FKs 
 - add indexes
 - add cascade delete for reservations to diners_reservations
-- verify datetime is in the future when creating reservation
