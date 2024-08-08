@@ -38,9 +38,23 @@ describe("search", () => {
 		}).toThrowError("DATE_SHOULD_BE_IN_THE_FUTURE");
 	});
 
+	test("throws if there are diners with already a reservation", () => {
+		repository.findDinerIdsWithReservationsAtDatetime = () => [1];
+
+		expect(() => {
+			reservationService.search({
+				diners: 2,
+				dinerIds: [1],
+				extraRestrictionIds: [2],
+				datetime: new Date(2024, 7, 8, 20, 0, 0),
+			});
+		}).toThrowError("THERE_ARE_DINERS_WITH_A_RESERVATION_ALREADY");
+	});
+
 	test("calls findTables with diners restriction ids + extra resctrictions ids", () => {
 		// stub
 		repository.findDinersRestrictionIds = () => [3];
+		repository.findDinerIdsWithReservationsAtDatetime = () => [];
 
 		repository.findTables = mock(() => ({}));
 

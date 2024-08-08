@@ -388,4 +388,16 @@ describe("repository", async () => {
 			expect(inserts).toBe(2);
 		});
 	});
+
+	describe("findDinerIdsWithReservationsAtDatetime", () => {
+		test("finds out of a list with diners have a reservation arount that time", () => {
+			const dinersWithReservation =
+				repository.findDinerIdsWithReservationsAtDatetime(db, {
+					datetime: new Date(2024, 7, 5, 20, 0, 0),
+					dinerIds: [2, 4],
+				});
+
+			expect(dinersWithReservation).toMatchObject([2]);
+		});
+	});
 });

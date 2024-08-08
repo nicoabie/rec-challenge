@@ -4,7 +4,6 @@ import { addHours } from "date-fns/addHours";
 import { addSeconds } from "date-fns/addSeconds";
 import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
 
-
 export class Repository {
 	findTables(
 		db: Database,
@@ -153,6 +152,30 @@ export class Repository {
 		});
 
 		return result.changes;
+	}
+
+	findDinerIdsWithReservationsAtDatetime(
+		db: Database,
+		info: { dinerIds: number[]; datetime: Date },
+	): number[] {
+		const { dinerIds, datetime } = info;
+
+		const query = db.query(`
+			SELECT dr.diner_id FROM diners_reservations dr
+			WHERE 
+				-- seems bun does not have a way to do this yet or documentation does not mention it
+				-- this is dangerous and could be sql injected
+				-- https://github.com/oven-sh/bun/issues/13174
+				dr.diner_id IN (${dinerIds})
+				AND dr.datetime BETWEEN $minDatetime AND $maxDatetime 
+		`);
+	
+		const result = query.all({
+			minDatetime: datetimeToISO8601(addSeconds(addHours(datetime, -2), 1)),
+			maxDatetime: datetimeToISO8601(addSeconds(addHours(datetime, 2), -1)),
+		}) as { diner_id: number }[]
+				
+		return result.map((o) => o.diner_id);
 	}
 
 	findDinersRestrictionIds(db: Database, dinerIds: number[]): number[] {

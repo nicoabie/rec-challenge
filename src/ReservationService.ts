@@ -5,6 +5,7 @@ import type { Repository } from "./Repository";
 const NO_TABLE_AVAILABLE = "NO_TABLE_AVAILABLE";
 const NOT_ALL_DINERS_AVAILABLE = "NOT_ALL_DINERS_AVAILABLE";
 const DATE_SHOULD_BE_IN_THE_FUTURE = "DATE_SHOULD_BE_IN_THE_FUTURE";
+const THERE_ARE_DINERS_WITH_A_RESERVATION_ALREADY = "THERE_ARE_DINERS_WITH_A_RESERVATION_ALREADY";
 
 // this service throws exceptions to flag business requirements not being met.
 // I did that because most people are used to exceptions.
@@ -30,6 +31,11 @@ export class ReservationService {
 
 		if (isBefore(datetime, new Date())) {
 			throw new Error(DATE_SHOULD_BE_IN_THE_FUTURE);
+		}
+
+		const dinersWithAlreadyAReservationAroundThatTime = this.repository.findDinerIdsWithReservationsAtDatetime(this.db, {dinerIds, datetime});
+		if (dinersWithAlreadyAReservationAroundThatTime.length) {
+			throw new Error(THERE_ARE_DINERS_WITH_A_RESERVATION_ALREADY);
 		}
 
 		const dinersRestrictionIds = this.repository.findDinersRestrictionIds(
