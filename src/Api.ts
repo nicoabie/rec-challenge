@@ -88,7 +88,7 @@ export class Api {
 		}
 
 		try {
-			const reservationId = this.reservationService.reserve(dinerId, {
+			const reservationId = this.reservationService.reserve({
 				restaurantId,
 				diners,
 				dinerIds,

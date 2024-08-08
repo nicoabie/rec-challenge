@@ -165,4 +165,19 @@ export class Repository {
 			bitsToIds(i.restrictions),
 		);
 	}
+
+	// it may be the case where a reservation gets created diners other than logged in diner because they have another reservation, we need a force delete to delete those reservations.
+	// another possibility would be to remove the current deleteReservation method and add a new method that checks if the logged in diner can remove the reservation and then call this one.
+	// I went with this apprach to have less calls to the db
+	forceDeleteReservation(db: Database, reservationId: number): boolean {
+		const query = db.query(
+			"DELETE FROM reservations WHERE id = $reservationId",
+		);
+
+		const result = query.run({
+			reservationId,
+		});
+
+		return !!result.changes;
+	}
 }

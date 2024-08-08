@@ -36,16 +36,13 @@ export class ReservationService {
 		});
 	}
 
-	reserve(
-		dinerId: number,
-		details: {
-			restaurantId: number;
-			diners: number;
-			dinerIds: number[];
-			datetime: Date;
-			tables: Record<string, number[]>;
-		},
-	): number {
+	reserve(details: {
+		restaurantId: number;
+		diners: number;
+		dinerIds: number[];
+		datetime: Date;
+		tables: Record<string, number[]>;
+	}): number {
 		const { restaurantId, diners, dinerIds, datetime, tables } = details;
 
 		// about how this method is implemented:
@@ -92,7 +89,13 @@ export class ReservationService {
 
 			if (createdDiners !== dinerIds.length) {
 				// some diners had a conflicting reservation, cancelling...
-				this.repository.deleteReservation(this.db, { reservationId, dinerId });
+				const deleted = this.repository.forceDeleteReservation(
+					this.db,
+					reservationId,
+				);
+				if (!deleted) {
+					// if for some reason the deletion failed we would log this event
+				}
 				throw new Error(NOT_ALL_DINERS_AVAILABLE);
 			}
 

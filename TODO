@@ -5,4 +5,3 @@
 - add indexes
 - add cascade delete for reservations to diners_reservations
 - verify datetime is in the future when creating reservation
-- it may be the case where a reservation gets created diners other than logged in diner because he has another reservation, we need a force delete to delete those reservations
