@@ -4,6 +4,7 @@ import { addHours } from "date-fns/addHours";
 import { addSeconds } from "date-fns/addSeconds";
 import { bitsToIds, datetimeToISO8601, idsToBits } from "./utils";
 
+
 export class Repository {
 	findTables(
 		db: Database,
@@ -98,6 +99,7 @@ export class Repository {
 				reservations.id IS NULL
 				-- seems bun does not have a way to do this yet or documentation does not mention it
 				-- this is dangerous and could be sql injected
+				-- https://github.com/oven-sh/bun/issues/13174
 				AND t.id IN (${tableIds})
 				-- the tablesIds should only contain tables with the specified capacity be cause they came from a previous search
 				-- but it is not bad to make sure
@@ -139,6 +141,7 @@ export class Repository {
 				diners_reservations.id IS NULL
 				-- seems bun does not have a way to do this yet or documentation does not mention it
 				-- this is dangerous and could be sql injected
+				-- https://github.com/oven-sh/bun/issues/13174
 				AND d.id IN (${dinerIds})
 		`);
 
@@ -158,6 +161,7 @@ export class Repository {
 			WHERE 
 				-- seems bun does not have a way to do this yet or documentation does not mention it
 				-- this is dangerous and could be sql injected
+				-- https://github.com/oven-sh/bun/issues/13174
 				d.id IN (${dinerIds})
 		`);
 
