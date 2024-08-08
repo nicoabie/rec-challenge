@@ -274,7 +274,7 @@ describe("repository", async () => {
 
 			expect(reservationId).toBeInteger();
 
-			const inserts = repository.createResevationDiners(db, {
+			const inserts = repository.createReservationDiners(db, {
 				reservationId,
 				datetime,
 				dinerIds: [3, 5],
@@ -294,7 +294,7 @@ describe("repository", async () => {
 
 			expect(reservationId).toBeInteger();
 
-			const inserts = repository.createResevationDiners(db, {
+			const inserts = repository.createReservationDiners(db, {
 				reservationId,
 				datetime,
 				dinerIds: [3, 5],
@@ -315,7 +315,7 @@ describe("repository", async () => {
 
 			expect(reservationId).toBeInteger();
 
-			const inserts = repository.createResevationDiners(db, {
+			const inserts = repository.createReservationDiners(db, {
 				reservationId,
 				datetime,
 				dinerIds: [3, 5],
@@ -336,7 +336,7 @@ describe("repository", async () => {
 
 			expect(reservationId).toBeInteger();
 
-			const inserts = repository.createResevationDiners(db, {
+			const inserts = repository.createReservationDiners(db, {
 				reservationId,
 				datetime,
 				dinerIds: [3, 5],
@@ -358,7 +358,7 @@ describe("repository", async () => {
 
 			expect(reservationId).toBeInteger();
 
-			const inserts = repository.createResevationDiners(db, {
+			const inserts = repository.createReservationDiners(db, {
 				reservationId,
 				datetime,
 				dinerIds: [3, 5],
@@ -379,7 +379,7 @@ describe("repository", async () => {
 
 			expect(reservationId).toBeInteger();
 
-			const inserts = repository.createResevationDiners(db, {
+			const inserts = repository.createReservationDiners(db, {
 				reservationId,
 				datetime,
 				dinerIds: [3, 5],

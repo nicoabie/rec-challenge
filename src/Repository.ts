@@ -120,7 +120,7 @@ export class Repository {
 		return null;
 	}
 
-	createResevationDiners(
+	createReservationDiners(
 		db: Database,
 		info: {
 			reservationId: number;

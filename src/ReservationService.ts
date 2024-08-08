@@ -2,7 +2,7 @@ import type { Database } from "bun:sqlite";
 import type { Repository } from "./Repository";
 
 const NO_TABLE_AVAILABLE = "NO_TABLE_AVAILABLE";
-const NO_ALL_DINERS_AVAILABLE = "NO_ALL_DINERS_AVAILABLE";
+const NOT_ALL_DINERS_AVAILABLE = "NOT_ALL_DINERS_AVAILABLE";
 
 export class ReservationService {
 	private repository: Repository;
@@ -50,8 +50,8 @@ export class ReservationService {
 
 		// about how this method is implemented:
 		// the sqlite driver for bun is synchronous and If I were to only have one instance of the server that would make it possible to first check
-		// if the reservation can be created and then just create it because there would be no concurrency. There would be no chance of a change between the check and the creation.
-		// I decided not to do it that way because it would be trick that won't scale in real world scenarios. most drivers are async in real life and one tends to have more than one instance.
+		// if the reservation can be created then just create it because there would be no concurrency. There would be no chance of a change between the check and the creation.
+		// I decided not to do it that way because it would be a trick that won't scale in real world scenarios. most drivers are async in real life and one tends to have more than one instance.
 		// Furthermore the only way to fix that would be using serializable isolation of transactions that would create a bottleneck.
 
 		// we wrap inside a transaction in case there is an issue between the creation of the reservation and the reservation diners.
@@ -84,7 +84,7 @@ export class ReservationService {
 				}
 			}
 
-			const createdDiners = this.repository.createResevationDiners(this.db, {
+			const createdDiners = this.repository.createReservationDiners(this.db, {
 				reservationId,
 				dinerIds,
 				datetime,
@@ -93,7 +93,7 @@ export class ReservationService {
 			if (createdDiners !== dinerIds.length) {
 				// some diners had a conflicting reservation, cancelling...
 				this.repository.deleteReservation(this.db, { reservationId, dinerId });
-				throw new Error(NO_ALL_DINERS_AVAILABLE);
+				throw new Error(NOT_ALL_DINERS_AVAILABLE);
 			}
 
 			return reservationId;
