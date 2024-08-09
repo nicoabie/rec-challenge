@@ -1,6 +1,3 @@
--- foreign keys checks therefore cascades are not enabled by default in sqlite
-PRAGMA foreign_keys = ON;
-
 -- intentionally encode restrictions into diners table
 -- I know it is not normalized BUT I save joins
 -- restrictions are encoded into integers for faster querying with bitwise operations than other string representations and using LIKE
