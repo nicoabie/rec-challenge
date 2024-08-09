@@ -20,4 +20,13 @@ To run:
 bun start 
 ```
 
+There is a postman_collection with examples of the requests
+
+To test:
+
+```bash
+bun test 
+```
+
+
 This project was created using `bun init` in bun v1.1.22. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

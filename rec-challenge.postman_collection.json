@@ -1,0 +1,139 @@
+{
+	"info": {
+		"_postman_id": "32e6addb-36bc-4cec-9ae9-e6ea6d6c88d8",
+		"name": "rec-challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3386113"
+	},
+	"item": [
+		{
+			"name": "search",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "loggedInDinerId",
+						"value": "{{loggedInDinerId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"diners\": 2, \"dinerIds\": [1,2], \"extraRestrictionIds\": [], \"datetime\": \"2027-08-02T23:00:00.000Z\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/search",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "reserve",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "loggedInDinerId",
+						"value": "{{loggedInDinerId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"restaurantId\":\"2\",\"availabilityToken\":\"eyJkaW5lcnMiOjIsImRpbmVySWRzIjpbMSwyXSwiZGF0ZXRpbWUiOiIyMDI3LTA4LTAyVDIzOjAwOjAwLjAwMFoiLCJ0YWJsZXMiOnsiMiI6WzgsOSwxMCwxMSwxMl19fQ==\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/reservations",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reservations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "cancel",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "loggedInDinerId",
+						"value": "{{loggedInDinerId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/reservations/1",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reservations",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "loggedInDinerId",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}
